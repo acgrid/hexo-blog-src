@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>PHPStorm SQL字符串与sprintf格式化 | Let 1000D-10B</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="问题PHPStorm打开一个老项目，在SQL字符串上全是警告，要求选择正确的SQL dialect，然而选择以后语法要求更加严格了，警告都成了错误。比如这张图：
+
+PHPStorm版本为 10.0.3。
+已有方案这里的解决办法。
+如果确实已有的SQL太坑了，连人都看不下去又不想重构，关闭检查也算是一种办法。
+然而试过PHPStorm添加数据库以后，自动补全功能又让人欲罢不能。
+而且看起来PHPSt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHPStorm SQL字符串与sprintf格式化">
+<meta property="og:url" content="http://998.aoba.moe/2016/01/21/phpstorm-sql-sprintf/index.html">
+<meta property="og:site_name" content="Let 1000D-10B">
+<meta property="og:description" content="问题PHPStorm打开一个老项目，在SQL字符串上全是警告，要求选择正确的SQL dialect，然而选择以后语法要求更加严格了，警告都成了错误。比如这张图：
+
+PHPStorm版本为 10.0.3。
+已有方案这里的解决办法。
+如果确实已有的SQL太坑了，连人都看不下去又不想重构，关闭检查也算是一种办法。
+然而试过PHPStorm添加数据库以后，自动补全功能又让人欲罢不能。
+而且看起来PHPSt">
+<meta property="og:image" content="http://998.aoba.moe/2016/01/21/phpstorm-sql-sprintf/problem.png">
+<meta property="og:image" content="http://998.aoba.moe/2016/01/21/phpstorm-sql-sprintf/setting.png">
+<meta property="og:image" content="http://998.aoba.moe/2016/01/21/phpstorm-sql-sprintf/resolved.png">
+<meta property="og:updated_time" content="2016-01-21T03:40:30.174Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHPStorm SQL字符串与sprintf格式化">
+<meta name="twitter:description" content="问题PHPStorm打开一个老项目，在SQL字符串上全是警告，要求选择正确的SQL dialect，然而选择以后语法要求更加严格了，警告都成了错误。比如这张图：
+
+PHPStorm版本为 10.0.3。
+已有方案这里的解决办法。
+如果确实已有的SQL太坑了，连人都看不下去又不想重构，关闭检查也算是一种办法。
+然而试过PHPStorm添加数据库以后，自动补全功能又让人欲罢不能。
+而且看起来PHPSt">
+  
+    <link rel="alternative" href="/atom.xml" title="Let 1000D-10B" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Let 1000D-10B</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Make changes from blogging</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://998.aoba.moe"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-phpstorm-sql-sprintf" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/01/21/phpstorm-sql-sprintf/" class="article-date">
+  <time datetime="2016-01-21T02:51:41.000Z" itemprop="datePublished">2016-01-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PHPStorm SQL字符串与sprintf格式化
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="u95EE_u9898"><a href="#u95EE_u9898" class="headerlink" title="问题"></a>问题</h1><p>PHPStorm打开一个老项目，在SQL字符串上全是警告，要求选择正确的SQL dialect，然而选择以后语法要求更加严格了，警告都成了错误。比如这张图：</p>
+<img src="/2016/01/21/phpstorm-sql-sprintf/problem.png" alt="血淋淋的SQL" title="血淋淋的SQL">
+<p>PHPStorm版本为 10.0.3。</p>
+<h1 id="u5DF2_u6709_u65B9_u6848"><a href="#u5DF2_u6709_u65B9_u6848" class="headerlink" title="已有方案"></a>已有方案</h1><p><a href="http://stackoverflow.com/questions/25529608/avoid-syntax-error-warnings-when-using-string-interpolation-in-sql-query-generat" target="_blank" rel="external">这里</a>的解决办法。</p>
+<p>如果确实已有的SQL太坑了，连人都看不下去又不想重构，关闭检查也算是一种办法。</p>
+<p>然而试过PHPStorm添加数据库以后，自动补全功能又让人欲罢不能。</p>
+<p>而且看起来PHPStorm也提供了User Parameter的支持，看起来就是他了。</p>
+<h1 id="u6CE2_u6298"><a href="#u6CE2_u6298" class="headerlink" title="波折"></a>波折</h1><p>当我兴冲冲的把<code>\%\w+</code>加入列表以后……并没有什么卵用，把它放在首位，也没有变化。</p>
+<img src="/2016/01/21/phpstorm-sql-sprintf/setting.png" alt="勾选的设定" title="勾选的设定">
+<p>怎么回事？虽然不太相信，将自带的规则删除后，错误消失了，明明下面带百分号的那条还限定了Java，没想到真的有冲突。</p>
+<p>为了支持类似于<code>%.2F</code>这样的格式化说明符，我把正则改为<code>\%(\.)?\w+</code>。至于为什么不是<code>%.2f</code>，大写F是非区域化，永远使用点作为小数点，不然当区域设定的小数点是逗号的时候就杯具了。</p>
+<p>最后发现UPDATE后面的%s仍然报错，既然不符合语法，就把%s换成普通的字符串连接，这下终于不报错了。</p>
+<img src="/2016/01/21/phpstorm-sql-sprintf/resolved.png" alt="成功洗白" title="成功洗白">
+<h1 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h1><p>找到解决方法后经过修改，1500多个SQL总算不报错了，有的因为连表名都是动态的所以出现无法解析的警告，至少比以前看起来好多了。</p>
+<p>使用<code>sprintf</code>来格式化SQL现在来看也是权宜之计，新的项目应该都是用数据对象抽象层或者用准备语句。讲道理，Raw SQL带来的迷之13格的代价就是可理解性和可测试性的损失啊。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://998.aoba.moe/2016/01/21/phpstorm-sql-sprintf/" data-id="cijnpp67y00005cifk4pmdhg9" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHPStorm/">PHPStorm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SQL/">SQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sprintf/">sprintf</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/效率/">效率</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自定义/">自定义</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHPStorm/">PHPStorm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SQL/">SQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sprintf/">sprintf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/效率/">效率</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自定义/">自定义</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/PHPStorm/" style="font-size: 10px;">PHPStorm</a> <a href="/tags/SQL/" style="font-size: 10px;">SQL</a> <a href="/tags/sprintf/" style="font-size: 10px;">sprintf</a> <a href="/tags/效率/" style="font-size: 10px;">效率</a> <a href="/tags/自定义/" style="font-size: 10px;">自定义</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/01/21/phpstorm-sql-sprintf/">PHPStorm SQL字符串与sprintf格式化</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 acgrid<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>
