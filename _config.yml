@@ -3,16 +3,16 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle:
+title: Let 1000D-10B
+subtitle: Make changes from blogging
 description:
-author: John Doe
-language:
-timezone:
+author: acgrid
+language: zh_CN
+timezone: Asia/Chongqing
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: http://998.aoba.moe
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -36,7 +36,7 @@ filename_case: 0
 render_drafts: false
 post_asset_folder: false
 relative_link: false
-future: true
+future: false
 highlight:
   enable: true
   line_number: true
@@ -68,4 +68,6 @@ theme: landscape
 # Deployment
 ## Docs: http://hexo.io/docs/deployment.html
 deploy:
-  type:
+  type: git
+  repo: git@github.com:acgrid/hexo-blog.git
+  branch: master
