@@ -62,8 +62,15 @@ pagination_dir: page
 
 # Extensions
 ## Plugins: http://hexo.io/plugins/
+plugin:
+- hexo-generator-feed
 ## Themes: http://hexo.io/themes/
 theme: landscape
+
+feed:
+type: atom
+path: atom.xml
+limit: 50
 
 # Deployment
 ## Docs: http://hexo.io/docs/deployment.html
