@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><![CDATA[Let 1000D-10B]]></title>
+  <subtitle><![CDATA[Make changes from blogging]]></subtitle>
+  <link href="/atom.xml" rel="self"/>
+  <link href="http://998.aoba.moe/"/>
+  <updated>2016-01-21T13:41:25.930Z</updated>
+  <id>http://998.aoba.moe/</id>
+  
+  <author>
+    <name><![CDATA[acgrid]]></name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[IIS部署Magento2小记]]></title>
+    <link href="http://998.aoba.moe/2016/01/21/install-magento2-iis10/"/>
+    <id>http://998.aoba.moe/2016/01/21/install-magento2-iis10/</id>
+    <published>2016-01-21T12:27:58.000Z</published>
+    <updated>2016-01-21T13:41:25.930Z</updated>
+    <content type="html"><![CDATA[<h1 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h1><p>看这文章的，都是铁了心要这么做的，就不废话了。当然production另当别论。</p>
+<h1 id="Web_u5B89_u88C5"><a href="#Web_u5B89_u88C5" class="headerlink" title="Web安装"></a>Web安装</h1><p>Magento2的<a href="http://devdocs.magento.com/guides/v2.0/install-gde/install/web/install-web.html" target="_blank" rel="external">官方文档</a>看起来比M1组织好多了，虽然我还没记住文档的大纲，还要不停地点导航。</p>
+<p>讲道理M2的安装程序做得不错，结果第一次安装，进度到14%就不动了。好在进度条和可以实时滚动的日志一看就知道是AJAX，随手开F12，我去居然是500。</p>
+<p>跑去PHP错误日志文件（好东西，不知道的请搜索<code>php.ini</code>中的<code>error_log</code>和<code>log_errors</code>这两项，顺便吐槽一下这命名水平w）一看，居然是执行超时。好吧，赶紧去改了，顺便把输入超时和内存限制也改了。</p>
+<p>如果你和我一样，发现不能重新运行安装程序，可以去命令行界面运行<code>./magento setup:uninstall</code>（建议用git的bash shell，不然需要用php magento.php的形式）就能干掉残废的安装而且已填写的信息可以保留。</p>
+<p>然而还是到17%的时候500，不过这次PHP日志没东西了。还好意识到FCGI还有一个超时设置，同样修改之，如图。仔细看了“活动超时”的意思，果然也要改才行！</p>
+<img src="/2016/01/21/install-magento2-iis10/iis.png" alt="IIS FastCGI设置" title="IIS FastCGI设置">
+<p>这下终于安装通过了。</p>
+<h1 id="u547D_u4EE4_u884C_u5B89_u88C5"><a href="#u547D_u4EE4_u884C_u5B89_u88C5" class="headerlink" title="命令行安装"></a>命令行安装</h1><p>为了避免被FCGI坑，其实完全可以在命令行安装，不过并不是交互式命令行，你需要一次性提供所需的参数= =||</p>
+<p>嘛，以后可以在生产环境下这么干。</p>
+<h1 id="webroot_u5E94_u8BE5_u5728_u54EA_u91CC"><a href="#webroot_u5E94_u8BE5_u5728_u54EA_u91CC" class="headerlink" title="webroot应该在哪里"></a>webroot应该在哪里</h1><p>M2的webroot居然可以在<code>/</code>也可以在<code>/pub</code>，真是32个赞，所以完全可以直接配置web server在<code>/pub</code>上，反正安装维护操作都可以用命令行处理。</p>
+<p>但是，如果安装时选择了启用重写，并且想当然的把<code>/.htaccess</code>下的重写迁移到IIS Rewrite下的话，又杯具了，静态文件都404了。</p>
+<h1 id="u7167_u732B_u753B_u864E_u505ARewrite"><a href="#u7167_u732B_u753B_u864E_u505ARewrite" class="headerlink" title="照猫画虎做Rewrite"></a>照猫画虎做Rewrite</h1><p>打开<code>/pub/static</code>就觉得已经解决问题了，空空如也except一个<code>.htaccess</code>，又无脑迁移……STOP！一不注意就添加到根目录的重写去了。在子目录上的重写规则，IIS和apache仍然是等效的，不然就只有在根目录下的规则里写死了。</p>
+<p>不过要注意继承于父目录的重写规则会在我们设置的规则生效前发生，还需要使用上移将它移动到继承规则的上面（从图上看，4个规则都是本地，相当于都覆盖了一遍，蛋疼。。）</p>
+<img src="/2016/01/21/install-magento2-iis10/rewrite.png" alt="IIS static目录下的Rewrite配置" title="IIS static目录下的Rewrite配置">
+<h1 id="u8BF4_u597D_u7684Symlink_u5462"><a href="#u8BF4_u597D_u7684Symlink_u5462" class="headerlink" title="说好的Symlink呢"></a>说好的Symlink呢</h1><p>之前在搜索时发现这个<a href="http://magento.stackexchange.com/questions/64802/magento-2-404-error-for-scipts-and-css" target="_blank" rel="external">问答</a>，试了下Windows下确实需要切换生成静态文件的方式，即将<code>app/etc/di.xml</code>中的</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="title">item</span> <span class="attribute">name</span>=<span class="value">"view_preprocessed"</span> <span class="attribute">xsi:type</span>=<span class="value">"object"</span>&gt;</span>Magento\Framework\App\View\Asset\MaterializationStrategy\Symlink<span class="tag">&lt;/<span class="title">item</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>换成：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="title">item</span> <span class="attribute">name</span>=<span class="value">"view_preprocessed"</span> <span class="attribute">xsi:type</span>=<span class="value">"object"</span>&gt;</span>Magento\Framework\App\View\Asset\MaterializationStrategy\Copy<span class="tag">&lt;/<span class="title">item</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>All the green!</p>
+<p>想起之前msysgit自带的<code>ln</code>也是莫名其妙地不能用，做成<code>mklink</code>的包装器不好么……看了这个Symlink类的代码，也是一个委托调用，没有继续去找是用的什么方式。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h1 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h1><p>看这文章的，都是铁了心要这么做的，就不废话了。当然production另当别论。</p>
+<h1 id=]]>
+    </summary>
+    
+      <category term="IIS" scheme="http://998.aoba.moe/tags/IIS/"/>
+    
+      <category term="Rewrite" scheme="http://998.aoba.moe/tags/Rewrite/"/>
+    
+      <category term="Win必须死" scheme="http://998.aoba.moe/tags/Win%E5%BF%85%E9%A1%BB%E6%AD%BB/"/>
+    
+      <category term="magento2" scheme="http://998.aoba.moe/tags/magento2/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[PHPStorm SQL字符串与sprintf格式化]]></title>
+    <link href="http://998.aoba.moe/2016/01/21/phpstorm-sql-sprintf/"/>
+    <id>http://998.aoba.moe/2016/01/21/phpstorm-sql-sprintf/</id>
+    <published>2016-01-21T02:51:41.000Z</published>
+    <updated>2016-01-21T03:40:30.174Z</updated>
+    <content type="html"><![CDATA[<h1 id="u95EE_u9898"><a href="#u95EE_u9898" class="headerlink" title="问题"></a>问题</h1><p>PHPStorm打开一个老项目，在SQL字符串上全是警告，要求选择正确的SQL dialect，然而选择以后语法要求更加严格了，警告都成了错误。比如这张图：</p>
+<img src="/2016/01/21/phpstorm-sql-sprintf/problem.png" alt="血淋淋的SQL" title="血淋淋的SQL">
+<p>PHPStorm版本为 10.0.3。</p>
+<h1 id="u5DF2_u6709_u65B9_u6848"><a href="#u5DF2_u6709_u65B9_u6848" class="headerlink" title="已有方案"></a>已有方案</h1><p><a href="http://stackoverflow.com/questions/25529608/avoid-syntax-error-warnings-when-using-string-interpolation-in-sql-query-generat" target="_blank" rel="external">这里</a>的解决办法。</p>
+<p>如果确实已有的SQL太坑了，连人都看不下去又不想重构，关闭检查也算是一种办法。</p>
+<p>然而试过PHPStorm添加数据库以后，自动补全功能又让人欲罢不能。</p>
+<p>而且看起来PHPStorm也提供了User Parameter的支持，看起来就是他了。</p>
+<h1 id="u6CE2_u6298"><a href="#u6CE2_u6298" class="headerlink" title="波折"></a>波折</h1><p>当我兴冲冲的把<code>\%\w+</code>加入列表以后……并没有什么卵用，把它放在首位，也没有变化。</p>
+<img src="/2016/01/21/phpstorm-sql-sprintf/setting.png" alt="勾选的设定" title="勾选的设定">
+<p>怎么回事？虽然不太相信，将自带的规则删除后，错误消失了，明明下面带百分号的那条还限定了Java，没想到真的有冲突。</p>
+<p>为了支持类似于<code>%.2F</code>这样的格式化说明符，我把正则改为<code>\%(\.)?\w+</code>。至于为什么不是<code>%.2f</code>，大写F是非区域化，永远使用点作为小数点，不然当区域设定的小数点是逗号的时候就杯具了。</p>
+<p>最后发现UPDATE后面的%s仍然报错，既然不符合语法，就把%s换成普通的字符串连接，这下终于不报错了。</p>
+<img src="/2016/01/21/phpstorm-sql-sprintf/resolved.png" alt="成功洗白" title="成功洗白">
+<h1 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h1><p>找到解决方法后经过修改，1500多个SQL总算不报错了，有的因为连表名都是动态的所以出现无法解析的警告，至少比以前看起来好多了。</p>
+<p>使用<code>sprintf</code>来格式化SQL现在来看也是权宜之计，新的项目应该都是用数据对象抽象层或者用准备语句。讲道理，Raw SQL带来的迷之13格的代价就是可理解性和可测试性的损失啊。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h1 id="u95EE_u9898"><a href="#u95EE_u9898" class="headerlink" title="问题"></a>问题</h1><p>PHPStorm打开一个老项目，在SQL字符串上全是警告，要求选择正确的SQL dialect，然而选择]]>
+    </summary>
+    
+      <category term="PHPStorm" scheme="http://998.aoba.moe/tags/PHPStorm/"/>
+    
+      <category term="SQL" scheme="http://998.aoba.moe/tags/SQL/"/>
+    
+      <category term="sprintf" scheme="http://998.aoba.moe/tags/sprintf/"/>
+    
+      <category term="效率" scheme="http://998.aoba.moe/tags/%E6%95%88%E7%8E%87/"/>
+    
+      <category term="自定义" scheme="http://998.aoba.moe/tags/%E8%87%AA%E5%AE%9A%E4%B9%89/"/>
+    
+  </entry>
+  
+</feed>
